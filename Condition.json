@@ -1,6 +1,6 @@
 {
   "format": "world-as-is/2",
-  "title": "The World As Is",
+  "title": "World as Is \u00b7 Soft Pull",
   "author": "",
   "studio_name": "",
   "day_length_seconds": 1200,
@@ -8,10 +8,17 @@
     {
       "card": "gravity",
       "template": "gravity",
-      "name": "Gravity",
-      "origin": "book",
+      "name": "Gravity \u00b7 Soft Pull",
+      "origin": "authored",
       "author": "",
-      "laws": []
+      "laws": [],
+      "parameter_changes": [
+        {
+          "key": "gravity_strength",
+          "from_hour": 0,
+          "value": 2.5
+        }
+      ]
     },
     {
       "card": "motion",
