@@ -4,7 +4,7 @@ signal arrived(plot)
 const HALF = 12.0 # Legacy plot unit; the Dunes path bounds this longer build.
 @export_range(2,31,1) var maximum_floor = 2
 const A = Vector3(0,0.45,0)
-const B = Vector3(168,0,0) # Default only; painted Goal cells determine arrival.
+const B = Vector3(168,0,0) # Fallback only; move Beacons/BOrb to choose the destination.
 const GROUND = 0
 const RAISED = 1
 const RAMP = 2
@@ -35,6 +35,8 @@ var rain_spawned = {}
 var wheel
 var placed_props: Array = []
 var lamps: Array = []
+var fire_lights: Array = []
+var lighting_age = 0.0
 var last_safe_position = A
 var safe_age = 0.0
 var recovery_count = 0
@@ -241,10 +243,16 @@ func check_wheel_cell(delta: float) -> void:
  elif tile != WATER:
   wheel.sinking = false
   wheel.sink_age = 0
- if tile == GOAL and absf(pos.y-float(surface_cell(pos).y)-.32)<.65 and arrival_seconds < 0:
+ if at_destination(pos) and arrival_seconds < 0:
   arrival_seconds = run_seconds
   wheel.set_deferred("freeze",true)
   arrived.emit(self)
+func destination_point() -> Vector3:
+ var orb = get_node_or_null("Beacons/BOrb")
+ return to_local(orb.global_position)-Vector3(0,1.5,0) if orb != null else B
+func at_destination(point: Vector3) -> bool:
+ var destination = destination_point()
+ return Vector2(point.x-destination.x,point.z-destination.z).length() < .7 and absf(point.y-destination.y-.32) < .65
 func validate_plot() -> Array[String]:
  # The editor stays unrestricted. These changes affect only the running copy.
  plot_errors.clear()
@@ -257,13 +265,12 @@ func validate_plot() -> Array[String]:
     ignored_cell_count += 1
  $Terrain.set_cell_item(Vector3i.ZERO,GROUND)
  for level in range(1,maximum_floor+1): $Terrain.set_cell_item(Vector3i(0,level,0),-1)
- # B is authored by painting Goal. Never restore a fixed east-edge endpoint.
+ # Older projects used a Goal tile. Keep their destination and turn it into floor.
  var goals = $Terrain.get_used_cells_by_item(GOAL)
  if not goals.is_empty():
-  var cell = goals[0]
-  $B.position = grid_point($Terrain,cell)+Vector3(0,$B.marker_height,0)
-  if has_node("Beacons/BOrb"): $Beacons/BOrb.position = grid_point($Terrain,cell)+Vector3(0,1.5,0)
- $B.visible = not goals.is_empty()
+  if has_node("Beacons/BOrb"):
+   $Beacons/BOrb.position = $Beacons.to_local(to_global(grid_point($Terrain,goals[0])+Vector3(0,1.5,0)))
+  for cell in goals: $Terrain.set_cell_item(cell,GROUND)
  return plot_errors
 func ground_at(world_position: Vector3) -> float:
  # Look below the body: a roof above it must never become its ground plane.
@@ -440,17 +447,29 @@ func create_props() -> void:
     prop.set_meta("kind",kind)
     placed_props.append(prop)
     if item == 7:
-     var light = OmniLight3D.new()
-     light.position.y = 1.5
-     light.omni_range = 5
-     light.light_color = Color("f3d4a2")
-     light.shadow_enabled = false
-     prop.add_child(light)
-     lamps.append(light)
+     var lamp = Node3D.new()
+     lamp.set_script(load("res://shared/grid_lamp.gd"))
+     prop.add_child(lamp)
+     lamps.append(lamp)
+ # Dense painted fires must not exhaust Compatibility's light budget.
+ # All flames remain visible; only nearby fires need a real light.
+ for fire in $CustomPieces.get_children():
+  if fire.get_script() == load("res://shared/fire.gd") and fire.has_node("Light"):
+   fire_lights.append(fire.get_node("Light"))
+ update_fire_lights()
+func update_fire_lights() -> void:
+ var camera = get_viewport().get_camera_3d()
+ if camera == null: return
+ fire_lights.sort_custom(func(a,b): return a.global_position.distance_squared_to(camera.global_position)<b.global_position.distance_squared_to(camera.global_position))
+ for i in fire_lights.size(): fire_lights[i].visible = i < 4
 func update_props(_delta: float) -> void:
+ lighting_age += _delta
+ if lighting_age >= .25:
+  lighting_age = 0.0
+  update_fire_lights()
  var night = 1.0-smoothstep(-.05,.15,float(current.light.vector.y))
  for lamp in lamps:
-  lamp.light_energy = night*clampf(float(current.light.energy),.2,2.0)
+  lamp.set_strength(night*clampf(float(current.light.energy),0,2.0))
  for prop in placed_props:
   if not is_instance_valid(prop) or prop is RigidBody3D: continue
   if prop.get_meta("kind","") == "Tree":
@@ -529,8 +548,7 @@ func create_beacons() -> void:
   beacons = Node3D.new()
   beacons.name = "Beacons"
   add_child(beacons)
- var goals = $Terrain.get_used_cells_by_item(GOAL)
- var destination = grid_point($Terrain,goals[0]) if not goals.is_empty() else B
+ var destination = destination_point()
  for item in [["AOrb",Vector3(0,1.5,0),Color("ffe0a3")],["BOrb",destination+Vector3(0,1.5,0),Color("72aeff")]]:
   var orb = beacons.get_node_or_null(item[0])
   if orb == null:
