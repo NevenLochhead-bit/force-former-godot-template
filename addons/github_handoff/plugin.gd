@@ -14,17 +14,17 @@ func _enter_tree() -> void:
  panel=AcceptDialog.new()
  panel.title="Save your project to GitHub"
  panel.ok_button_text="Done"
- panel.min_size=Vector2i(620,370)
+ var scale=EditorInterface.get_editor_scale()
+ panel.min_size=Vector2i(int(740*scale),int(480*scale))
  EditorInterface.get_base_control().add_child(panel)
  var box=VBoxContainer.new()
+ box.custom_minimum_size=Vector2(700*scale,0)
  box.add_theme_constant_override("separation",16)
  panel.add_child(box)
  var intro=Label.new()
  intro.text="Your complete Godot project is the submission.\nTerrain, sounds, Condition.json and Inspector settings stay together."
- intro.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
  box.add_child(intro)
  status=Label.new()
- status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
  box.add_child(status)
  var folder=LineEdit.new()
  folder.text=ProjectSettings.globalize_path("res://")
@@ -50,8 +50,12 @@ func open_handoff() -> void:
  EditorInterface.save_all_scenes()
  var root=ProjectSettings.globalize_path("res://")
  var linked=DirAccess.dir_exists_absolute(root.path_join(".git")) or FileAccess.file_exists(root.path_join(".git"))
- status.text="Scenes saved. This folder is a Git repository; open the same repository in GitHub Desktop." if linked else "Scenes saved. This folder is not yet a Git repository. In GitHub Desktop, choose File → Add Local Repository, select this folder, and use Create a Repository here if prompted. Then Publish repository."
- panel.popup_centered()
+ status.text="Scenes saved. This folder is a Git repository.\nOpen the same repository in GitHub Desktop." if linked else "Scenes saved. This folder is not yet a Git repository.\nIn GitHub Desktop: File → Add Local Repository → select this folder.\nChoose Create a Repository here if prompted, then Publish repository."
+ var scale=EditorInterface.get_editor_scale()
+ for child in panel.get_children():
+  if child is VBoxContainer:child.custom_minimum_size.x=700*scale
+ panel.min_size=Vector2i(int(740*scale),int(480*scale))
+ panel.popup_centered(panel.min_size)
 
 func _exit_tree() -> void:
  if is_instance_valid(button):
