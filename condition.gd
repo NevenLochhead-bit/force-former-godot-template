@@ -549,7 +549,7 @@ func create_beacons() -> void:
   beacons.name = "Beacons"
   add_child(beacons)
  var destination = destination_point()
- for item in [["AOrb",Vector3(0,1.5,0),Color("ffe0a3")],["BOrb",destination+Vector3(0,1.5,0),Color("72aeff")]]:
+ for item in [["AOrb",Vector3(0,3,0),Color("ffe0a3")],["BOrb",destination+Vector3(0,1.5,0),Color("72aeff")]]:
   var orb = beacons.get_node_or_null(item[0])
   if orb == null:
    orb = Node3D.new()

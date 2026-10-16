@@ -143,7 +143,7 @@ shadow_enabled = true
 [node name="Instructions" type="Node3D" parent="." unique_id=1192941134]
 
 [node name="A" type="Label3D" parent="." unique_id=63146897]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.2, 0)
 pixel_size = 0.008
 billboard = 1
 text = "A"
@@ -180,7 +180,7 @@ The blue light marks B."
 [node name="Beacons" type="Node3D" parent="." unique_id=46697504]
 
 [node name="AOrb" type="Node3D" parent="Beacons" unique_id=683995781]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
 script = ExtResource("17_w6tio")
 
 [node name="BOrb" type="Node3D" parent="Beacons" unique_id=349980465]
