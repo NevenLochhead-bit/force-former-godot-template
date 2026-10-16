@@ -11,4 +11,4 @@ func _process(delta: float) -> void:
  if terrain == null: return
  var goals = terrain.get_used_cells_by_item(5)
  visible = not goals.is_empty()
- if visible: position = terrain.map_to_local(goals[0])+Vector3(0,marker_height,0)
+ if visible: position = get_parent().to_local(terrain.to_global(terrain.map_to_local(goals[0])))+Vector3(0,marker_height,0)

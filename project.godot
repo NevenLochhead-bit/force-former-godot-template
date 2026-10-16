@@ -22,7 +22,7 @@ window/stretch/mode="canvas_items"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/build_guard/plugin.cfg", "res://addons/github_handoff/plugin.cfg")
+enabled=PackedStringArray("res://addons/build_guard/plugin.cfg", "res://addons/github_handoff/plugin.cfg", "res://addons/map_navigation/plugin.cfg")
 
 [rendering]
 

@@ -51,11 +51,10 @@ tonemap_mode = 2
 script = ExtResource("1_ihtym")
 
 [node name="Terrain" type="GridMap" parent="." unique_id=586571513]
+position = Vector3(-0.5, 0, -0.5)
 mesh_library = ExtResource("2_gfihf")
 cell_size = Vector3(1, 1, 1)
-cell_center_x = false
 cell_center_y = false
-cell_center_z = false
 data = {
 "cells": PackedInt32Array(65535, 65535, 0, 65535, 0, 0, 65535, 1, 0, 0, 65535, 0, 0, 0, 0, 0, 1, 0, 1, 65535, 0, 1, 0, 0, 1, 1, 0, 167, 65535, 0, 167, 0, 0, 167, 1, 0, 168, 65535, 0, 168, 0, 5, 168, 1, 0, 169, 65535, 0, 169, 0, 0, 169, 1, 0)
 }
@@ -63,11 +62,10 @@ script = ExtResource("3_wtorr")
 metadata/_editor_floor_ = Vector3(0, 1, 0)
 
 [node name="Things" type="GridMap" parent="." unique_id=1759040780]
+position = Vector3(-0.5, 0, -0.5)
 mesh_library = ExtResource("2_gfihf")
 cell_size = Vector3(1, 1, 1)
-cell_center_x = false
 cell_center_y = false
-cell_center_z = false
 script = ExtResource("3_wtorr")
 
 [node name="Dunes" type="Path3D" parent="." unique_id=1065525425]

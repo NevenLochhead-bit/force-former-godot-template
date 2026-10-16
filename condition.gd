@@ -196,14 +196,23 @@ func reset_wheel() -> void:
  update_view(0)
 func in_plot(local_position: Vector3) -> bool:
  return $Dunes.allows($Dunes.to_local(to_global(local_position)))
+# Convert through both node transforms: painted tiles and editor grid share cell edges.
+func grid_point(grid: GridMap,cell: Vector3i) -> Vector3:
+ return to_local(grid.to_global(grid.map_to_local(cell)))
+func grid_cell(grid: GridMap,point: Vector3) -> Vector3i:
+ var local_point = grid.to_local(to_global(point))
+ # Preserve older uncentred project files as well as the aligned template.
+ if not grid.cell_center_x: local_point.x += grid.cell_size.x*.5
+ if not grid.cell_center_z: local_point.z += grid.cell_size.z*.5
+ return grid.local_to_map(local_point)
 func surface_height(cell: Vector3i,tile: int,pos: Vector3) -> float:
  if tile == RAMP:
   var basis = $Terrain.get_basis_with_orthogonal_index($Terrain.get_cell_item_orientation(cell))
-  var point = basis.inverse()*(pos-$Terrain.map_to_local(cell))
+  var point = basis.inverse()*(pos-grid_point($Terrain,cell))
   return float(cell.y)+clampf(point.x+.5,0,1)
  return float(cell.y)+(2.0 if tile == WALL else 1.0 if tile == RAISED else 0.0)
 func surface_cell(local_position: Vector3) -> Vector3i:
- var cell = $Terrain.local_to_map(local_position+Vector3(.5,0,.5))
+ var cell = grid_cell($Terrain,local_position)
  # The surface below this body, not the highest tile anywhere in its column.
  for level in range(maximum_floor,-1,-1):
   var probe = Vector3i(cell.x,level,cell.z)
@@ -223,7 +232,7 @@ func check_wheel_cell(delta: float) -> void:
   return
  var tile = tile_under(pos)
  if tile == WATER: wheel.water_level = surface_cell(pos).y
- var cell = $Terrain.local_to_map(pos+Vector3(.5,0,.5))
+ var cell = grid_cell($Terrain,pos)
  var under_water = wheel.sinking and $Terrain.get_cell_item(Vector3i(cell.x,wheel.water_level,cell.z)) == WATER
  if under_water or (tile == WATER and pos.y < float(wheel.water_level)+.6):
   wheel.sinking = true
@@ -243,7 +252,7 @@ func validate_plot() -> Array[String]:
  for grid in [$Terrain,$Things]:
   grid.straighten_tiles()
   for cell in grid.get_used_cells():
-   if not in_plot(grid.map_to_local(cell)) or cell.y < 0 or cell.y > maximum_floor:
+   if not in_plot(grid_point(grid,cell)) or cell.y < 0 or cell.y > maximum_floor:
     grid.set_cell_item(cell,-1)
     ignored_cell_count += 1
  $Terrain.set_cell_item(Vector3i.ZERO,GROUND)
@@ -252,8 +261,8 @@ func validate_plot() -> Array[String]:
  var goals = $Terrain.get_used_cells_by_item(GOAL)
  if not goals.is_empty():
   var cell = goals[0]
-  $B.position = $Terrain.map_to_local(cell)+Vector3(0,$B.marker_height,0)
-  if has_node("Beacons/BOrb"): $Beacons/BOrb.position = $Terrain.map_to_local(cell)+Vector3(0,1.5,0)
+  $B.position = grid_point($Terrain,cell)+Vector3(0,$B.marker_height,0)
+  if has_node("Beacons/BOrb"): $Beacons/BOrb.position = grid_point($Terrain,cell)+Vector3(0,1.5,0)
  $B.visible = not goals.is_empty()
  return plot_errors
 func ground_at(world_position: Vector3) -> float:
@@ -392,7 +401,7 @@ func create_props() -> void:
   for cell in grid.get_used_cells():
    var item = grid.get_cell_item(cell)
    if item not in [6,7,8,9]: continue
-   var point = grid.map_to_local(cell)
+   var point = grid_point(grid,cell)
    var orientation = grid.get_basis_with_orthogonal_index(grid.get_cell_item_orientation(cell))
    grid.set_cell_item(cell,-1) # Remove the static palette preview in this running copy.
    var kind = "Tree" if item == 6 else "Lamp" if item == 7 else "Stone"
@@ -521,7 +530,7 @@ func create_beacons() -> void:
   beacons.name = "Beacons"
   add_child(beacons)
  var goals = $Terrain.get_used_cells_by_item(GOAL)
- var destination = $Terrain.map_to_local(goals[0]) if not goals.is_empty() else B
+ var destination = grid_point($Terrain,goals[0]) if not goals.is_empty() else B
  for item in [["AOrb",Vector3(0,1.5,0),Color("ffe0a3")],["BOrb",destination+Vector3(0,1.5,0),Color("72aeff")]]:
   var orb = beacons.get_node_or_null(item[0])
   if orb == null:
