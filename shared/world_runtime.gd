@@ -90,6 +90,8 @@ func spawn(kind: String,pos: Vector3,velocity: Vector3,weather: bool,index: int=
  body.add_child(ring)
  if not weather and index<int(n.light.persistent_light_cap):
   var coal = OmniLight3D.new()
+  # Join the plot light budget before becoming a real light. Its mesh still glows.
+  coal.visible = not has_method("update_local_lights")
   coal.omni_range = n.light.coal_reach_metres
   coal.light_energy = n.light.coal_energy
   coal.light_color = Color(.7,.73,.83)

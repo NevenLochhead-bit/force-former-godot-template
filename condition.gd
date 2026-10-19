@@ -79,6 +79,7 @@ func _ready() -> void:
  compiled_report = compatibility_report()
  set_active(active_plot)
  reset_wheel()
+ update_local_lights()
 func set_active(value: bool) -> void:
  active_plot = value
  if not is_node_ready(): return
@@ -383,7 +384,7 @@ func compatibility_report() -> Array:
    report.append({"force":card.name,"parameter":change.key,"from_hour":change.from_hour,"value":change.value,"status":"honoured","student_sees":"A bounded numeric change begins at this hour and persists until replaced."})
  report.append({"system":"Wheel controls","status":"approximated","student_sees":"Arrow keys drive the Wheel along the support plane; Assisted is %s; when on it holds the Wheel on build surfaces even under zero or upward gravity. Falling things retain the full rest/apex laws; a 3 m/s horizontal speed cap and ground traction against gentle idle wind keep the starter route readable. The traveller keeps its standard size; size laws still affect precipitation."%("on" if wheel.assisted else "off")})
  report.append({"system":"Observation things","status":"approximated","student_sees":"A sparse stream of glowing generic Things demonstrates the condition on the dune slopes between A and B, independently of timed weather. They land and roll on the sand, never push the Wheel and expire after 45 seconds."})
- report.append({"system":"Placed props","status":"approximated","student_sees":"Stones are generic Things using the same law and numeric-parameter runtime as precipitation. Trees stay rooted and sway with wind; Lamps follow night/day and light strength. Neither is a new wheel vocabulary option."})
+ report.append({"system":"Placed props","status":"approximated","student_sees":"Stones are generic Things using the same law and numeric-parameter runtime as precipitation. Trees stay rooted and sway with wind; Lamps cast their own light throughout the day, including in sunless conditions. Nearby lights illuminate the map; distant bulbs and flames keep their glow. Neither is a new wheel vocabulary option."})
  report.append({"system":"Plot boundary","status":"approximated","student_sees":"The Wheel returns to its most recent safe build surface after a fall or water. Precipitation expires outside the plot; the old world-wrap boundary is retired."})
  if has_node("Forces") and not $Forces.overrides().is_empty():
   report.append({"system":"Godot numeric overrides","status":"approximated","values":$Forces.overrides(),"student_sees":"Each named card's Inspector values replace its imported numeric schedule only when that card supplies the resolved parameter, across its matching bodies. Imported law words, eligibility and timing of other parameters remain in Condition.json."})
@@ -451,25 +452,42 @@ func create_props() -> void:
      lamp.set_script(load("res://shared/grid_lamp.gd"))
      prop.add_child(lamp)
      lamps.append(lamp)
- # Dense painted fires must not exhaust Compatibility's light budget.
- # All flames remain visible; only nearby fires need a real light.
+ # Keep all painted objects; budget their real lights together with glowing Things.
  for fire in $CustomPieces.get_children():
   if fire.get_script() == load("res://shared/fire.gd") and fire.has_node("Light"):
    fire_lights.append(fire.get_node("Light"))
- update_fire_lights()
-func update_fire_lights() -> void:
+ update_local_lights()
+func update_local_lights() -> void:
  var camera = get_viewport().get_camera_3d()
  if camera == null: return
- fire_lights.sort_custom(func(a,b): return a.global_position.distance_squared_to(camera.global_position)<b.global_position.distance_squared_to(camera.global_position))
- for i in fire_lights.size(): fire_lights[i].visible = i < 4
+ # Compatibility has a small per-mesh light limit. Reserve two slots for A/B.
+ # A row viewed end-on must not crowd out the lights around the Wheel.
+ var lights: Array = fire_lights.duplicate()
+ for lamp in lamps: lights.append(lamp.get_node("Light"))
+ for body in bodies:
+  if not is_instance_valid(body): continue
+  for child in body.get_children():
+   if child is OmniLight3D: lights.append(child)
+ lights.sort_custom(func(a,b): return a.global_position.distance_squared_to(camera.global_position)<b.global_position.distance_squared_to(camera.global_position))
+ var used = 0
+ var fires = 0
+ for light in lights:
+  var is_fire = light in fire_lights
+  var enabled = used < 6 and (not is_fire or fires < 4)
+  light.visible = enabled
+  if enabled:
+   used += 1
+   if is_fire: fires += 1
+func update_fire_lights() -> void:
+ # Retain the old entry point for existing test tools.
+ update_local_lights()
 func update_props(_delta: float) -> void:
  lighting_age += _delta
  if lighting_age >= .25:
   lighting_age = 0.0
-  update_fire_lights()
- var night = 1.0-smoothstep(-.05,.15,float(current.light.vector.y))
- for lamp in lamps:
-  lamp.set_strength(night*clampf(float(current.light.energy),0,2.0))
+  update_local_lights()
+ # A placed lamp is a light source, independent of the sun's strength or schedule.
+ for lamp in lamps: lamp.set_strength(1.0)
  for prop in placed_props:
   if not is_instance_valid(prop) or prop is RigidBody3D: continue
   if prop.get_meta("kind","") == "Tree":
