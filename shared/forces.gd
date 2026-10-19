@@ -7,9 +7,18 @@ const Controls = preload("res://shared/force_controls.gd")
 @export_storage var saved_card_overrides: Dictionary = {}
 var synced_stamp = -2
 var check_age = 0.0
-@export_group("Preview clock")
-@export var preview_clock_enabled = false
-@export_range(30,1800,30) var preview_day_seconds = 240.0
+@export_group("Day clock")
+## Use Day duration as the base day length. Time force laws and Time rate still apply.
+@export var use_godot_duration = false
+## Seconds for one full day at a consistent Time rate of 1x.
+@export_range(30,1800,30,"suffix:s") var day_duration = 240.0
+# Read legacy scenes without dropping their saved clock settings.
+@export_storage var preview_clock_enabled: bool:
+ get: return use_godot_duration
+ set(value): use_godot_duration = value
+@export_storage var preview_day_seconds: float:
+ get: return day_duration
+ set(value): day_duration = value
 var plot
 var panel: PanelContainer
 var readout: Label
@@ -131,7 +140,7 @@ func apply_to(compiler) -> void:
  var changed=compiler.card_numeric_overrides!=next
  compiler.card_numeric_overrides=next
  if plot!=null:
-  plot.preview_seconds=preview_day_seconds if preview_clock_enabled else float(compiler.world.day_length_seconds)
+  plot.preview_seconds=day_duration if use_godot_duration else float(compiler.world.day_length_seconds)
   if changed and not plot.compiled_report.is_empty():plot.compiled_report=plot.compatibility_report()
 func bind_plot(value) -> void:
  plot=value
@@ -172,5 +181,5 @@ func update_values() -> void:
   gravity="%.2f m/s² · %s"%[float(p.gravity.strength),"down" if dir.y<-.9 else "up" if dir.y>.9 else str(dir)]
  var local_values=overrides()
  var origin="Condition timeline" if local_values.is_empty() else "Cards with Godot overrides: "+str(local_values.size())
- if preview_clock_enabled:origin+="\nPreview day: %ds · Condition: %ds"%[int(preview_day_seconds),int(plot.compiler.world.day_length_seconds)]
+ if use_godot_duration:origin+="\nDay duration: %ds · Imported base: %ds"%[int(day_duration),int(plot.compiler.world.day_length_seconds)]
  readout.text="FORCES · %02d:%02d\n\nGravity    %s\nWind       %s\nResistance %.2f\nRebound    %.2f\nLight      %.2f×\nSound      %.2f×\nRainfall   %.2f×\nTime       %.2f×\n\n%s\n\nWheel Assisted: %s\nFalling things use the full condition.\n\nAdjust under Forces in the Inspector.\nSave Local scene edits before Play.\nRemote edits last for this run only."%[int(plot.hour),int(fmod(plot.hour,1)*60),gravity,wind,float(p.body.motion_resistance),float(p.body.rebound),float(plot.compiler.tuned("light_strength","light","sun.colour",plot.hour)),float(p.sound.strength),float(p.weather.rain_rate),float(p.clock.pace),origin,"on" if plot.wheel.ground_adhesion else "off"]

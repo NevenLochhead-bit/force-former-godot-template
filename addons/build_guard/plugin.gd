@@ -1,6 +1,12 @@
 @tool
 extends EditorPlugin
 var grid: GridMap
+var day_clock_inspector: EditorInspectorPlugin
+func _enter_tree() -> void:
+ day_clock_inspector = preload("res://addons/build_guard/day_clock_inspector.gd").new()
+ add_inspector_plugin(day_clock_inspector)
+func _exit_tree() -> void:
+ remove_inspector_plugin(day_clock_inspector)
 func _handles(object: Object) -> bool: return object is GridMap
 func _edit(object: Object) -> void: grid = object as GridMap
 func _forward_3d_gui_input(_camera: Camera3D,event: InputEvent) -> int:

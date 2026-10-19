@@ -388,7 +388,7 @@ func compatibility_report() -> Array:
  if has_node("Forces") and not $Forces.overrides().is_empty():
   report.append({"system":"Godot numeric overrides","status":"approximated","values":$Forces.overrides(),"student_sees":"Each named card's Inspector values replace its imported numeric schedule only when that card supplies the resolved parameter, across its matching bodies. Imported law words, eligibility and timing of other parameters remain in Condition.json."})
  if has_node("Forces") and $Forces.preview_clock_enabled:
-  report.append({"system":"Godot preview clock","status":"approximated","student_sees":"Preview day is %s seconds; the imported Condition remains %s seconds. Hour relationships are unchanged, with a faster local preview."%[$Forces.preview_day_seconds,compiler.world.day_length_seconds]})
+  report.append({"system":"Godot day duration","status":"approximated","student_sees":"Day duration is %s base seconds; the imported Condition remains %s base seconds. Time rate and the imported clock laws still apply."%[$Forces.preview_day_seconds,compiler.world.day_length_seconds]})
  return report
 
 func report_entries(card: Dictionary) -> Array:

@@ -90,8 +90,8 @@ script = ExtResource("8_lsuon")
 
 [node name="Forces" type="Node3D" parent="." unique_id=1169767455]
 script = ExtResource("9_mty6o")
-preview_clock_enabled = true
-preview_day_seconds = 240
+use_godot_duration = true
+day_duration = 240
 
 [node name="Gravity" type="Node" parent="Forces" unique_id=62316235]
 script = ExtResource("8_dbdy4")
