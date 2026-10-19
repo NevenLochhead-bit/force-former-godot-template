@@ -53,6 +53,15 @@ func set_world(data) -> bool:
  if not data.get("forces") is Array:
   errors.append("Forces must be an array.")
   return false
+ data = data.duplicate(true)
+ for card in data.forces:
+  if not card is Dictionary or card.get("template") != "light" or not card.get("laws") is Array or card.get("sun_timing") == 1: continue
+  for id in ["light.sunrise","light.sunset"]:
+   var existing = card.laws.filter(func(fill):return fill is Dictionary and fill.get("id") == id)
+   for fill in existing:
+    if fill.get("slots") is Dictionary and not fill.slots.has("at_hour"): fill.slots.at_hour = "%02d" % int(fill.get("from_hour",0))
+   if existing.is_empty(): card.laws.append({"id":id,"from_hour":0,"slots":{"verb":"rise" if id == "light.sunrise" else "fall","relative_location":"above" if id == "light.sunrise" else "below","at_hour":"06" if id == "light.sunrise" else "18"}})
+  card.sun_timing = 1
  var ids = {}
  for card in data.forces:
   if not card is Dictionary or not card.get("laws") is Array:
@@ -100,7 +109,7 @@ func writes(law: Dictionary,slots: Dictionary) -> Array:
   for key in value if value is Array else [value]: out.append_array(law.option_writes[slot].get(key,[]))
  return out
 func rank(c: Dictionary) -> Array:
- return [c.hour,{"constant":0,"relation":1,"gate":2}.get(c.law.tier,-1),c.law.order,c.index]
+ return [c.get("source_hour",c.hour),{"constant":0,"relation":1,"gate":2}.get(c.law.tier,-1),c.law.order,c.index]
 func later(a: Dictionary,b: Dictionary) -> bool:
  var x = rank(a)
  var y = rank(b)
@@ -205,16 +214,14 @@ func clock_factor(path: String,elapsed: float,seconds: float) -> float:
 func sun_events() -> Array:
  if not cached_sun_events.is_empty(): return cached_sun_events
  var events = {}
- for id in ["light.sunrise","light.sunset"]:
-  var found = false
-  for c in entries(23):
-   if c.law.id != id: continue
-   found = true
-   if not events.has(c.hour) or later(c,events[c.hour]): events[c.hour] = c
-  if not found:
-   var h = 6 if id == "light.sunrise" else 18
-   var c = {"law":by_id[id],"slots":defaults(by_id[id]),"hour":h,"index":-1,"implicit":true}
-   if not events.has(h): events[h] = c
+ for source in entries(23):
+  if source.law.id not in ["light.sunrise","light.sunset"]: continue
+  if source.card.template != "light": continue
+  if source.hour == 0 and source.card.get("timing_synthetic",{}).get("laws",[]).has(source.law.id): continue
+  var event = source.duplicate(true)
+  event.source_hour = source.hour
+  event.hour = int(source.slots.get("at_hour",str(source.hour))) % 24
+  if not events.has(event.hour) or later(event,events[event.hour]): events[event.hour] = event
  var keys = events.keys()
  keys.sort()
  var out = []
@@ -223,6 +230,7 @@ func sun_events() -> Array:
  return out
 func sun(hour: float) -> Dictionary:
  var events = sun_events()
+ if events.is_empty():return {"vector":Vector3.DOWN,"height":-1.0,"is_night":true,"predawn":0.0,"next_location":"above"}
  var last = events.back()
  var next = events.front()
  for e in events:
@@ -272,7 +280,8 @@ func environment_parameters(hour: float,ctx: Dictionary) -> Dictionary:
  var colour_key = glow.get("colour","white")
  if ctx._sun.is_empty(): ctx._sun = sun(hour)
  var sun_data = ctx._sun.duplicate()
- sun_data.merge({"colour":numbers.light.colours.get(colour_key,[1,1,1]),"energy":0 if fill("sun.energy",hour,{},ctx).get("relative_quality") == "shaded" else numbers.light.bright_energy if colour_key == "white_bright" else numbers.light.energy,"disc_visible":fill("sun.disc_visible",hour,{},ctx).get("relative_quality") != "invisible","disc_scale":{"bigger":numbers.light.larger_disc,"smaller":numbers.light.smaller_disc}.get(fill("sun.disc_scale",hour,{},ctx).get("relative_quality"),1)})
+ var has_sun = not sun_events().is_empty()
+ sun_data.merge({"colour":numbers.light.colours.get(colour_key,[1,1,1]),"energy":0 if not has_sun or fill("sun.energy",hour,{},ctx).get("relative_quality") == "shaded" else numbers.light.bright_energy if colour_key == "white_bright" else numbers.light.energy,"disc_visible":has_sun and fill("sun.disc_visible",hour,{},ctx).get("relative_quality") != "invisible","disc_scale":{"bigger":numbers.light.larger_disc,"smaller":numbers.light.smaller_disc}.get(fill("sun.disc_scale",hour,{},ctx).get("relative_quality"),1)})
  ctx._environment = {"clock":{"running":fill("clock.running",hour,{},ctx).get("verb") != "stay","sign":-1 if fill("clock.sign",hour,{},ctx).get("relative_location") == "behind" else 1,"pattern":fill("clock.rate_pattern",hour,{},ctx).get("pattern","consistent"),"path":fill("clock.path",hour,{},ctx).get("vector","straight")},"light":sun_data,"weather":{"emitting":hour>=start and hour<end and rain.slots.verb != "stay","window":[start,end],"cloud_verb":rain.slots.verb,"cloud_things":fill("cloud.things",hour,{},ctx).get("things","raindrops"),"wind_path":fill("wind.path",hour,{},ctx).get("vector","random")},"sound":{"visible":fill("sound.visibility",hour,{},ctx).get("relative_quality") in ["visible","glowing"],"propagates":fill("sound.propagates",hour,{},ctx).get("verb") != "stay"}}
  return ctx._environment
 func parameters(hour: float,b: Dictionary={},ctx: Dictionary={}) -> Dictionary:

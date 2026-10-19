@@ -889,7 +889,7 @@
     "tier": "relation",
     "status": "honoured",
     "given": "Sun rise.",
-    "sentence": "Sun [verb] [relative location].",
+    "sentence": "Sun [verb] [relative location] at [hour].",
     "slots": [
       {
         "key": "verb",
@@ -918,6 +918,39 @@
           "far_away"
         ],
         "selection": "single"
+      },
+      {
+        "key": "at_hour",
+        "family": "hour",
+        "default": "06",
+        "allowed": [
+          "00",
+          "01",
+          "02",
+          "03",
+          "04",
+          "05",
+          "06",
+          "07",
+          "08",
+          "09",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "23",
+          "24"
+        ],
+        "selection": "single"
       }
     ],
     "writes": [
@@ -934,7 +967,7 @@
     "tier": "relation",
     "status": "honoured",
     "given": "Sun fall.",
-    "sentence": "Sun [verb] [relative location].",
+    "sentence": "Sun [verb] [relative location] at [hour].",
     "slots": [
       {
         "key": "verb",
@@ -961,6 +994,39 @@
           "behind",
           "nearby",
           "far_away"
+        ],
+        "selection": "single"
+      },
+      {
+        "key": "at_hour",
+        "family": "hour",
+        "default": "18",
+        "allowed": [
+          "00",
+          "01",
+          "02",
+          "03",
+          "04",
+          "05",
+          "06",
+          "07",
+          "08",
+          "09",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "23",
+          "24"
         ],
         "selection": "single"
       }

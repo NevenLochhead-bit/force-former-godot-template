@@ -35,7 +35,27 @@
       "name": "Light",
       "origin": "book",
       "author": "",
-      "laws": []
+      "laws": [
+        {
+          "id": "light.sunrise",
+          "from_hour": 0,
+          "slots": {
+            "verb": "rise",
+            "relative_location": "above",
+            "at_hour": "06"
+          }
+        },
+        {
+          "id": "light.sunset",
+          "from_hour": 0,
+          "slots": {
+            "verb": "fall",
+            "relative_location": "below",
+            "at_hour": "18"
+          }
+        }
+      ],
+      "sun_timing": 1
     },
     {
       "card": "sound",

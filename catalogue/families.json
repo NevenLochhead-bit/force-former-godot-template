@@ -852,5 +852,182 @@
       "order": 1701,
       "source": "https://app.notion.com/3f2e76ad1e9f815bbab1d13be6283050"
     }
+  ],
+  "hour": [
+    {
+      "key": "00",
+      "label": "00",
+      "status": "honoured",
+      "meaning": "00:00 in the condition’s repeating 24-hour day.",
+      "order": 0
+    },
+    {
+      "key": "01",
+      "label": "01",
+      "status": "honoured",
+      "meaning": "01:00 in the condition’s repeating 24-hour day.",
+      "order": 1
+    },
+    {
+      "key": "02",
+      "label": "02",
+      "status": "honoured",
+      "meaning": "02:00 in the condition’s repeating 24-hour day.",
+      "order": 2
+    },
+    {
+      "key": "03",
+      "label": "03",
+      "status": "honoured",
+      "meaning": "03:00 in the condition’s repeating 24-hour day.",
+      "order": 3
+    },
+    {
+      "key": "04",
+      "label": "04",
+      "status": "honoured",
+      "meaning": "04:00 in the condition’s repeating 24-hour day.",
+      "order": 4
+    },
+    {
+      "key": "05",
+      "label": "05",
+      "status": "honoured",
+      "meaning": "05:00 in the condition’s repeating 24-hour day.",
+      "order": 5
+    },
+    {
+      "key": "06",
+      "label": "06",
+      "status": "honoured",
+      "meaning": "06:00 in the condition’s repeating 24-hour day.",
+      "order": 6
+    },
+    {
+      "key": "07",
+      "label": "07",
+      "status": "honoured",
+      "meaning": "07:00 in the condition’s repeating 24-hour day.",
+      "order": 7
+    },
+    {
+      "key": "08",
+      "label": "08",
+      "status": "honoured",
+      "meaning": "08:00 in the condition’s repeating 24-hour day.",
+      "order": 8
+    },
+    {
+      "key": "09",
+      "label": "09",
+      "status": "honoured",
+      "meaning": "09:00 in the condition’s repeating 24-hour day.",
+      "order": 9
+    },
+    {
+      "key": "10",
+      "label": "10",
+      "status": "honoured",
+      "meaning": "10:00 in the condition’s repeating 24-hour day.",
+      "order": 10
+    },
+    {
+      "key": "11",
+      "label": "11",
+      "status": "honoured",
+      "meaning": "11:00 in the condition’s repeating 24-hour day.",
+      "order": 11
+    },
+    {
+      "key": "12",
+      "label": "12",
+      "status": "honoured",
+      "meaning": "12:00 in the condition’s repeating 24-hour day.",
+      "order": 12
+    },
+    {
+      "key": "13",
+      "label": "13",
+      "status": "honoured",
+      "meaning": "13:00 in the condition’s repeating 24-hour day.",
+      "order": 13
+    },
+    {
+      "key": "14",
+      "label": "14",
+      "status": "honoured",
+      "meaning": "14:00 in the condition’s repeating 24-hour day.",
+      "order": 14
+    },
+    {
+      "key": "15",
+      "label": "15",
+      "status": "honoured",
+      "meaning": "15:00 in the condition’s repeating 24-hour day.",
+      "order": 15
+    },
+    {
+      "key": "16",
+      "label": "16",
+      "status": "honoured",
+      "meaning": "16:00 in the condition’s repeating 24-hour day.",
+      "order": 16
+    },
+    {
+      "key": "17",
+      "label": "17",
+      "status": "honoured",
+      "meaning": "17:00 in the condition’s repeating 24-hour day.",
+      "order": 17
+    },
+    {
+      "key": "18",
+      "label": "18",
+      "status": "honoured",
+      "meaning": "18:00 in the condition’s repeating 24-hour day.",
+      "order": 18
+    },
+    {
+      "key": "19",
+      "label": "19",
+      "status": "honoured",
+      "meaning": "19:00 in the condition’s repeating 24-hour day.",
+      "order": 19
+    },
+    {
+      "key": "20",
+      "label": "20",
+      "status": "honoured",
+      "meaning": "20:00 in the condition’s repeating 24-hour day.",
+      "order": 20
+    },
+    {
+      "key": "21",
+      "label": "21",
+      "status": "honoured",
+      "meaning": "21:00 in the condition’s repeating 24-hour day.",
+      "order": 21
+    },
+    {
+      "key": "22",
+      "label": "22",
+      "status": "honoured",
+      "meaning": "22:00 in the condition’s repeating 24-hour day.",
+      "order": 22
+    },
+    {
+      "key": "23",
+      "label": "23",
+      "status": "honoured",
+      "meaning": "23:00 in the condition’s repeating 24-hour day.",
+      "order": 23
+    },
+    {
+      "key": "24",
+      "label": "24",
+      "status": "honoured",
+      "meaning": "Midnight; the same moment as 00.",
+      "order": 24
+    }
   ]
 }
